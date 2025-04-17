@@ -1,0 +1,46 @@
+services:
+  jenkins:
+    image: jenkins/jenkins:lts-jdk17
+    container_name: jenkins
+    networks:
+      - jenkins-net
+    ports:
+      - "8080:8080"
+      - "50000:50000"
+    volumes:
+      - jenkins_home:/var/jenkins_home
+      - /var/run/docker.sock:/var/run/docker.sock
+#    restart: unless-stopped
+  backend:
+    build:
+      context: ./Backend
+      dockerfile: Dockerfile
+    networks:
+      - jenkins-net
+    ports:
+      - "9090:8080"
+#    restart: unless-stopped
+  db:
+    build:
+      context: ./db
+      dockerfile: Dockerfile
+    ports:
+      - "5433:5432"
+    networks:
+      - jenkins-net
+    environment:
+      POSTGRES_DB: admin
+      POSTGRES_USER: admin
+      POSTGRES_PASSWORD: admin
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+#    restart: unless-stopped
+
+networks:
+  jenkins-net:
+
+volumes:
+  jenkins_home:
+  postgres_data:
+
+#  29d8a2e524004940bb62208cbddd527a
